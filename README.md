@@ -15,7 +15,21 @@ FROM ghcr.io/indexa-git/odoo:master
 
 exactly the way you would write `FROM odoo:19.0` on the 19.0 line.
 
+The package is **private**. Consumers authenticate with `GITHUB_TOKEN` and must
+be granted read access to it under *package settings > Manage Actions access*:
+
+```yaml
+- uses: docker/login-action@v3
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+From a laptop, log in with a classic PAT carrying `read:packages`:
+
 ```bash
+echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 docker pull ghcr.io/indexa-git/odoo:master
 ```
 
@@ -50,8 +64,11 @@ To pin an exact nightly, run the workflow manually with:
 weekly (Monday 06:00 UTC) to pick up the week's nightly, or on demand.
 
 It authenticates with `GITHUB_TOKEN`, which is what GitHub recommends for
-workflows, and which also links the package to this repository automatically —
-so the package inherits this repository's visibility.
+workflows, and which also links the package to this repository automatically.
+
+Note that linking does not make the package public: GHCR packages are private on
+first publish regardless of the repository's visibility, and this one is
+deliberately left private.
 
 ## Lifecycle
 
